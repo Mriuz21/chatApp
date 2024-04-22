@@ -1,12 +1,12 @@
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string>
+#include <thread> 
 
 int main()
 {
@@ -31,12 +31,15 @@ int main()
         std::cout << "Can't connect" << std::endl;
         return 1;
     }
-    char message[4096];
+    std::string message;
     while(true)
     {
-        std :: cout << "Write message : ";
-        std :: cin >> message;
-        send(sock, message, strlen(message), 0);
+        std::cout << "Write message: ";
+        std::getline(std::cin, message);
+        send(sock, message.c_str(), message.length(), 0);
+        
+        // Sleep for 100 milliseconds
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     return 0;
 }
