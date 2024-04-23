@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <thread> 
+#include <cstring>
 
 int main()
 {
@@ -20,7 +21,7 @@ int main()
     }
 
     int port = 5555;
-    std::string ipAddress = "127.0.0.1";
+    std::string ipAddress = "10.0.2.15";
     sockaddr_in hint;
     hint.sin_family = AF_INET;
     hint.sin_port = htons(port);
@@ -35,13 +36,28 @@ int main()
     std::cout << "Write your name: ";
     std::getline(std::cin, name);
     std::string message;
+
+    // Thread for receiving messages
+    std::thread receiveThread([&]() {
+        char buffer[4096];
+        while (true) {
+            memset(buffer, 0, 4096);
+            int bytesReceived = recv(sock, buffer, 4096, 0);
+            if (bytesReceived == -1) {
+                std::cout << "Error in recv()" << std::endl;
+                break;
+            } else if (bytesReceived == 0) {
+                std::cout << "Server disconnected" << std::endl;
+                break;
+            }
+            std::cout << buffer << std::endl;
+        }
+    });
+
     while(true)
     {
-        std::cout << "Write message: ";
         std::getline(std::cin, message);
-        
-        // Concatenate name and message
-        std::string fullMessage = name + ": " + message;
+        std::string fullMessage = name + ":" + message;
         
         // Send the full message
         send(sock, fullMessage.c_str(), fullMessage.length(), 0);
@@ -49,5 +65,11 @@ int main()
         // Sleep for 100 milliseconds
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+
+    // Join the receive thread before exiting
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
+
     return 0;
 }

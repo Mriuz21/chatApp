@@ -8,6 +8,9 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <chrono>
+
+std :: vector<int> clients;
 
 void handleClient(int newSock)
 {
@@ -24,12 +27,20 @@ void handleClient(int newSock)
         }
         std::cout << buffer << std::endl;
 
-        send(newSock, buffer, bytesReceived, 0);
+        // Send the message to all other clients
+        for (int clientSock : clients) {
+            if (clientSock != newSock) {
+                send(clientSock, buffer, bytesReceived, 0);
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(169));
     }
 
     // Close the socket when the client disconnects
     close(newSock);
+
 }
+
 
 int main() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -39,7 +50,7 @@ int main() {
     }
     std::vector<std::thread> threads;
     int port = 5555; 
-    std::string ipAddress = "127.0.0.1";
+    std::string ipAddress = "10.0.2.15";
     sockaddr_in hint;
     hint.sin_family = AF_INET;
     hint.sin_port = htons(port);
@@ -76,7 +87,7 @@ int main() {
             inet_ntop(AF_INET, &(client.sin_addr), host, NI_MAXHOST);
             std::cout << host << " connected on port " << ntohs(client.sin_port) << std::endl;
         }
-
+        clients.push_back(newSock);
         // Create and start a new thread to handle the client
         threads.push_back(std::thread(handleClient, newSock));
     }
