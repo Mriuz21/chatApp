@@ -6,6 +6,30 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string>
+#include <thread>
+#include <vector>
+
+void handleClient(int newSock)
+{
+    while(true) {
+        char buffer[4096];
+        memset(buffer, 0, 4096);
+        int bytesReceived = recv(newSock, buffer, 4096, 0);
+        if (bytesReceived == -1) {
+            std::cout << "Error in recv()" << std::endl;
+            break;
+        } else if (bytesReceived == 0) {
+            std::cout << "Client disconnected" << std::endl;
+            break;
+        }
+        std::cout << "Received: " << buffer << std::endl;
+
+        send(newSock, buffer, bytesReceived, 0);
+    }
+
+    // Close the socket when the client disconnects
+    close(newSock);
+}
 
 int main() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -13,7 +37,7 @@ int main() {
         std::cout << "Can't create socket" << std::endl;
         return 1;
     }
-
+    std::vector<std::thread> threads;
     int port = 5555; 
     std::string ipAddress = "127.0.0.1";
     sockaddr_in hint;
@@ -53,25 +77,15 @@ int main() {
             std::cout << host << " connected on port " << ntohs(client.sin_port) << std::endl;
         }
 
-        // Handle messages from client
-        while (true) {
-            char buffer[4096];
-            memset(buffer, 0, 4096);
-            int bytesReceived = recv(newSock, buffer, 4096, 0);
-            if (bytesReceived == -1) {
-                std::cout << "Error in recv()" << std::endl;
-                break;
-            } else if (bytesReceived == 0) {
-                std::cout << "Client disconnected" << std::endl;
-                break;
-            }
-            std::cout << "Received: " << buffer << std::endl;
+        // Create and start a new thread to handle the client
+        threads.push_back(std::thread(handleClient, newSock));
+    }
 
-            send(newSock, buffer, bytesReceived, 0);
+    // Join all threads before exiting
+    for (auto& thread : threads) {
+        if (thread.joinable()) {
+            thread.join();
         }
-
-        // Close the socket when the client disconnects
-        close(newSock);
     }
 
     return 0;
