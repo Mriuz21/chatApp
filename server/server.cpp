@@ -22,7 +22,7 @@ void handleClient(int newSock)
             std::cout << "Client disconnected" << std::endl;
             break;
         }
-        std::cout << "Received: " << buffer << std::endl;
+        std::cout << buffer << std::endl;
 
         send(newSock, buffer, bytesReceived, 0);
     }

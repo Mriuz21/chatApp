@@ -11,6 +11,7 @@
 int main()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
+    std::string name;
 
     if(sock == -1)
     {
@@ -31,12 +32,19 @@ int main()
         std::cout << "Can't connect" << std::endl;
         return 1;
     }
+    std::cout << "Write your name: ";
+    std::getline(std::cin, name);
     std::string message;
     while(true)
     {
         std::cout << "Write message: ";
         std::getline(std::cin, message);
-        send(sock, message.c_str(), message.length(), 0);
+        
+        // Concatenate name and message
+        std::string fullMessage = name + ": " + message;
+        
+        // Send the full message
+        send(sock, fullMessage.c_str(), fullMessage.length(), 0);
         
         // Sleep for 100 milliseconds
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
