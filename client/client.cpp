@@ -9,6 +9,7 @@
 #include <thread> 
 #include <cstring>
 
+
 int main()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,7 +43,7 @@ int main()
         char buffer[4096];
         while (true) {
             memset(buffer, 0, 4096);
-            int bytesReceived = recv(sock, buffer, 4096, 0);
+            int bytesReceived = recv(sock, buffer, 20, 0);
             if (bytesReceived == -1) {
                 std::cout << "Error in recv()" << std::endl;
                 break;
@@ -59,11 +60,10 @@ int main()
         std::getline(std::cin, message);
         std::string fullMessage = name + ":" + message;
         
-        // Send the full message
-        send(sock, fullMessage.c_str(), fullMessage.length(), 0);
         
-        // Sleep for 100 milliseconds
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        send(sock, fullMessage.c_str(), fullMessage.length(), 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
     }
 
     // Join the receive thread before exiting

@@ -9,6 +9,9 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+#include <mutex>
+
+std::mutex mtx;
 
 std :: vector<int> clients;
 
@@ -28,13 +31,14 @@ void handleClient(int newSock)
         std::cout << buffer << std::endl;
 
         // Send the message to all other clients
+        mtx.lock();
         for (int clientSock : clients) {
             if (clientSock != newSock) {
-                send(clientSock, buffer, bytesReceived, 0);
+                send(clientSock, buffer, strlen(buffer), 0);
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(169));
-    }
+        mtx.unlock();
+     }
 
     // Close the socket when the client disconnects
     close(newSock);
