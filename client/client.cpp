@@ -4,24 +4,21 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <thread> 
+#include <thread>
 #include <cstring>
+#include <chrono>
 
-
-int main()
-{
+int main() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     std::string name;
 
-    if(sock == -1)
-    {
+    if (sock == -1) {
         std::cout << "Can't create socket" << std::endl;
         return 1;
     }
 
-    int port = 5555;
+    int port = 5556;
     std::string ipAddress = "10.0.2.15";
     sockaddr_in hint;
     hint.sin_family = AF_INET;
@@ -29,8 +26,7 @@ int main()
     inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
 
     int connectRes = connect(sock, (sockaddr*)&hint, sizeof(sockaddr_in));
-    if(connectRes == -1)
-    {
+    if (connectRes == -1) {
         std::cout << "Can't connect" << std::endl;
         return 1;
     }
@@ -43,7 +39,7 @@ int main()
         char buffer[4096];
         while (true) {
             memset(buffer, 0, 4096);
-            int bytesReceived = recv(sock, buffer, 20, 0);
+            int bytesReceived = recv(sock, buffer, 4096, 0);
             if (bytesReceived == -1) {
                 std::cout << "Error in recv()" << std::endl;
                 break;
@@ -55,14 +51,13 @@ int main()
         }
     });
 
-    while(true)
-    {
+    while (true) {
         std::getline(std::cin, message);
         std::string fullMessage = name + ":" + message;
-        
-        
-        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+
         send(sock, fullMessage.c_str(), fullMessage.length(), 0);
+
+        // Introduce a delay before sending the next message
         std::this_thread::sleep_for(std::chrono::milliseconds(400));
     }
 

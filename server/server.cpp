@@ -16,8 +16,7 @@ std::mutex mtx;
 std :: vector<int> clients;
 
 void handleClient(int newSock)
-{
-    while(true) {
+{     while(true){
         char buffer[4096];
         memset(buffer, 0, 4096);
         int bytesReceived = recv(newSock, buffer, 4096, 0);
@@ -38,8 +37,7 @@ void handleClient(int newSock)
             }
         }
         mtx.unlock();
-     }
-
+    }
     // Close the socket when the client disconnects
     close(newSock);
 
@@ -53,7 +51,7 @@ int main() {
         return 1;
     }
     std::vector<std::thread> threads;
-    int port = 5555; 
+    int port = 5556; 
     std::string ipAddress = "10.0.2.15";
     sockaddr_in hint;
     hint.sin_family = AF_INET;
