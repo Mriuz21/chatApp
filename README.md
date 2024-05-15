@@ -6,9 +6,9 @@ This is a simple chat application implemented in C++ using CMake. It consists of
 
 - Client-server architecture
 - Network communication using sockets
-- Cross-platform compatibility (Linux, Windows, macOS)
 
 ## Requirements
 
 - CMake 3.10 or higher
 - A C++ compiler (GCC, Clang, MSVC, etc.)
+- A unix-based OS
